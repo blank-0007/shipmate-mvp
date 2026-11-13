@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Wrench, Scissors, BellOff, ShieldAlert, CheckCircle, RotateCcw } from 'lucide-react';
 
 export default function TriageModal({ isOpen, onClose, member, onSaveTriage }) {
-  if (!isOpen || !member) return null;
-
-  const [selectedAction, setSelectedAction] = useState(
-    member.triage_status !== 'none' ? member.triage_status : 'fallback_api'
-  );
-  const [note, setNote] = useState(member.triage_note || '');
+  // Hooks MUST be declared at top before any early returns (fixing D12)
+  const [selectedAction, setSelectedAction] = useState('fallback_api');
+  const [note, setNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (member) {
+      setSelectedAction(
+        member.triage_status && member.triage_status !== 'none'
+          ? member.triage_status
+          : 'fallback_api'
+      );
+      setNote(member.triage_note || '');
+    }
+  }, [member, isOpen]);
+
+  if (!isOpen || !member) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,34 +26,33 @@ export default function TriageModal({ isOpen, onClose, member, onSaveTriage }) {
     try {
       let snoozedUntil = null;
       if (selectedAction === 'snoozed') {
-        // Snooze 1 hour from now
         snoozedUntil = new Date(Date.now() + 60 * 60 * 1000).toISOString();
       }
 
       await onSaveTriage(member.id, {
-        triage_status: selectedAction,
-        triage_note: note.trim() || null,
-        snoozed_until: snoozedUntil,
+        action: selectedAction,
+        note: note.trim() || null,
+        snoozedUntil,
       });
       onClose();
     } catch (err) {
-      alert(`Failed to save triage action: ${err.message}`);
+      alert(`Failed to record triage decision: ${err.message}`);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleResetToActive = async () => {
+  const handleReset = async () => {
     setIsSaving(true);
     try {
       await onSaveTriage(member.id, {
-        triage_status: 'none',
-        triage_note: null,
-        snoozed_until: null,
+        action: 'none',
+        note: null,
+        snoozedUntil: null,
       });
       onClose();
     } catch (err) {
-      alert(`Failed to reset: ${err.message}`);
+      alert(`Failed to reset triage status: ${err.message}`);
     } finally {
       setIsSaving(false);
     }
@@ -60,12 +69,13 @@ export default function TriageModal({ isOpen, onClose, member, onSaveTriage }) {
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-100">Private Early Triage Advisor</h3>
-              <p className="text-xs text-slate-400">Triage contributor: @{member.github_handle}</p>
+              <p className="text-xs text-slate-400">Contributor: @{member.github_handle}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-800 transition"
+            className="text-slate-400 hover:text-slate-200 p-2 rounded-lg hover:bg-slate-800 transition min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="Close triage modal"
           >
             <X className="w-5 h-5" />
           </button>
@@ -75,18 +85,18 @@ export default function TriageModal({ isOpen, onClose, member, onSaveTriage }) {
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="text-xs text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800">
             <p className="font-medium text-slate-200">
-              Silence Telemetry: <span className="font-mono text-amber-400">{member.hoursSinceLastCommit}h elapsed</span> with {member.commitCount} commits.
+              Silence Telemetry: <span className="font-mono text-amber-400">{member.silenceFormatted} elapsed</span> without qualifying activity.
             </p>
             <p className="text-slate-400 mt-1">
-              Select an action to keep the hackathon sprint on track and prevent submission blindspots.
+              Select an action to cut deadweight features early and submit on time without all-nighters.
             </p>
           </div>
 
-          {/* 3 Triage Options */}
+          {/* 3 Explicit Triage Options */}
           <div className="space-y-3">
             {/* Option A */}
             <label
-              className={`flex items-start p-3.5 rounded-xl border cursor-pointer transition ${
+              className={`flex items-start p-3.5 rounded-xl border cursor-pointer transition min-h-[48px] ${
                 selectedAction === 'fallback_api'
                   ? 'bg-blue-500/10 border-blue-500 text-slate-100 ring-1 ring-blue-500/40'
                   : 'bg-slate-950/50 border-slate-800 hover:border-slate-700 text-slate-300'
@@ -103,7 +113,7 @@ export default function TriageModal({ isOpen, onClose, member, onSaveTriage }) {
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
                   <Wrench className="w-4 h-4 text-blue-400" />
-                  <span className="font-bold text-sm text-slate-100">[A] Switch to Fallback API / Mock Data</span>
+                  <span className="font-bold text-sm text-slate-100">[A] Switch to Fallback API</span>
                 </div>
                 <p className="text-xs text-slate-400">
                   Switch the stalled component or integration to a mock/static JSON fallback so the UI can be shipped without waiting.
@@ -113,7 +123,7 @@ export default function TriageModal({ isOpen, onClose, member, onSaveTriage }) {
 
             {/* Option B */}
             <label
-              className={`flex items-start p-3.5 rounded-xl border cursor-pointer transition ${
+              className={`flex items-start p-3.5 rounded-xl border cursor-pointer transition min-h-[48px] ${
                 selectedAction === 'cut_scope'
                   ? 'bg-rose-500/10 border-rose-500 text-slate-100 ring-1 ring-rose-500/40'
                   : 'bg-slate-950/50 border-slate-800 hover:border-slate-700 text-slate-300'
@@ -133,14 +143,14 @@ export default function TriageModal({ isOpen, onClose, member, onSaveTriage }) {
                   <span className="font-bold text-sm text-slate-100">[B] Cut Feature Scope</span>
                 </div>
                 <p className="text-xs text-slate-400">
-                  Officially shelve this feature. Disables further inactivity sirens and records the decision in the submission manifest.
+                  Officially shelve this feature. Disables further inactivity sirens while preserving real telemetry in the submission manifest.
                 </p>
               </div>
             </label>
 
             {/* Option C */}
             <label
-              className={`flex items-start p-3.5 rounded-xl border cursor-pointer transition ${
+              className={`flex items-start p-3.5 rounded-xl border cursor-pointer transition min-h-[48px] ${
                 selectedAction === 'snoozed'
                   ? 'bg-indigo-500/10 border-indigo-500 text-slate-100 ring-1 ring-indigo-500/40'
                   : 'bg-slate-950/50 border-slate-800 hover:border-slate-700 text-slate-300'
@@ -157,37 +167,37 @@ export default function TriageModal({ isOpen, onClose, member, onSaveTriage }) {
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
                   <BellOff className="w-4 h-4 text-indigo-400" />
-                  <span className="font-bold text-sm text-slate-100">[C] Snooze Alert for 1 Hour</span>
+                  <span className="font-bold text-sm text-slate-100">[C] Snooze 1 Hour</span>
                 </div>
                 <p className="text-xs text-slate-400">
-                  Teammate is working locally or taking a break. Suppresses the inactivity warning banner for exactly 60 minutes.
+                  Teammate is working locally or sleeping. Suppresses warning banner for exactly 60 minutes.
                 </p>
               </div>
             </label>
           </div>
 
-          {/* Triage Note Input */}
+          {/* Reason / Context Note */}
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Reason / Context Note (Persisted to Manifest)
+              Reason / Context Note (Persisted to Audit Log)
             </label>
             <input
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="e.g., Using mock auth tokens due to provider outage"
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500"
+              placeholder="e.g., Auth service down, using mocked tokens"
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 min-h-[44px]"
             />
           </div>
 
           {/* Action Footer */}
           <div className="flex items-center justify-between pt-3 border-t border-slate-800">
-            {member.triage_status !== 'none' ? (
+            {member.triage_status && member.triage_status !== 'none' ? (
               <button
                 type="button"
-                onClick={handleResetToActive}
+                onClick={handleReset}
                 disabled={isSaving}
-                className="text-xs text-slate-400 hover:text-slate-200 flex items-center space-x-1"
+                className="text-xs text-slate-400 hover:text-slate-200 flex items-center space-x-1 min-h-[44px] px-2"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset to Normal</span>
@@ -198,14 +208,14 @@ export default function TriageModal({ isOpen, onClose, member, onSaveTriage }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition"
+                className="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition min-h-[44px]"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSaving}
-                className="px-4 py-2 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-lg transition flex items-center space-x-1.5 shadow-sm"
+                className="px-4 py-2 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-lg transition flex items-center space-x-1.5 shadow-sm min-h-[44px]"
               >
                 <CheckCircle className="w-4 h-4" />
                 <span>{isSaving ? 'Persisting...' : 'Persist Decision'}</span>

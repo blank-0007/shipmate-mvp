@@ -1,0 +1,6 @@
+# Cloudflare Pages Functions / Worker Environment Secrets
+# Copy to .dev.vars for local testing. NEVER commit .dev.vars to Git!
+GITHUB_TOKEN=
+FIGMA_TOKEN=
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
