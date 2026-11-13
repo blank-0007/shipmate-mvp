@@ -70,10 +70,7 @@ export async function createDemoRoom(env) {
     },
   ];
 
-  const { room, members } = await createRoomInDb(env, roomData, membersData.map(m => ({
-    ...m,
-    room_id: undefined, // Filled by createRoomInDb logic or we attach room_id after
-  })));
+  const { room, members } = await createRoomInDb(env, roomData, membersData);
 
   return {
     room,

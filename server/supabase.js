@@ -38,10 +38,15 @@ export async function createRoomInDb(env, roomData, membersData) {
   // 2. Insert members
   let createdMembers = [];
   if (membersData.length > 0) {
+    const membersWithRoomId = membersData.map((m) => ({
+      ...m,
+      room_id: createdRoom.id,
+    }));
+
     const memRes = await fetch(`${base}/rest/v1/members`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(membersData),
+      body: JSON.stringify(membersWithRoomId),
     });
 
     if (!memRes.ok) {
