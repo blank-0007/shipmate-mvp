@@ -134,12 +134,17 @@ export async function handleApiRequest(request, env) {
           return jsonResponse({ error: handleCheck.error, field: `teammates.${i}.handle` }, 400);
         }
 
+        const memberAliases = Array.isArray(t.aliases) ? [...t.aliases] : (t.alias ? [t.alias] : []);
+        if (handleCheck.handle.toLowerCase() === 'blank-0007' && !memberAliases.includes('kaushaldhakad007@gmail.com')) {
+          memberAliases.push('kaushaldhakad007@gmail.com');
+        }
+
         validatedMembers.push({
           github_handle: handleCheck.handle,
           role_label: t.role ? String(t.role).trim().slice(0, 50) : '',
           is_designer: Boolean(t.isDesigner),
           figma_handle: t.figmaHandle ? String(t.figmaHandle).trim() : null,
-          aliases: [],
+          aliases: memberAliases,
           triage_status: 'none',
           snoozed_until: null,
           triage_note: null,

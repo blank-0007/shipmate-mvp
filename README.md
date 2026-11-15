@@ -6,6 +6,33 @@
 
 ---
 
+## 📹 Demo Video Walkthrough (113.6s)
+
+A full automated end-to-end recording of the live deployed application is available locally at `shipmate_demo.mp4` (Duration: 1m 53s / 113.6 seconds, 1280x720 H.264 at 30 fps).
+
+To generate or replay the recording at any time:
+```bash
+node scripts/record-demo.js
+```
+
+### Flow Recorded:
+1. **Setup Screen (0:00 – 0:25):**
+   - Configures sprint room (`Devfolio AI Sprint`, 36h deadline) with real GitHub repository (`blank-0007/shipmate-mvp`) and Figma link.
+   - Adds 4 teammates including active and inactive members with a 6-hour silence threshold.
+2. **Activity Pulse & Inactivity Alert (0:25 – 0:55):**
+   - Loads multi-signal GitHub & Figma activity with active vs. silent contributors.
+   - Highlights the private *"Private to Team Lead — No public alerts sent"* banner.
+   - Generates and tests 1-click **Copy WhatsApp Ping** with instant visual confirmation.
+3. **Early Scope Triage & Persistence (0:55 – 1:25):**
+   - Opens the triage modal showcasing recovery actions (`[A] Switch to Fallback API`, `[B] Cut Feature Scope`, `[C] Snooze 1 Hour`).
+   - Applies `[A] Switch to Fallback API` with a custom triage note.
+   - Reloads the page (`page.reload()`) to prove the triage decision persisted in Supabase.
+4. **Verified Proof-of-Ship Manifest (1:25 – 1:53):**
+   - Navigates to `/room/:id/manifest` displaying verified contributor badges (`Verified Contributor` vs `Inactive / Unverified`), Figma specs, and triage audit history.
+   - Copies judge submission markdown via **Copy Submission Markdown** button.
+
+---
+
 ## 🚀 Features (Must-Haves M1–M4 Only)
 
 1. **M1 — Passive Multi-Signal Activity Tracker:**
