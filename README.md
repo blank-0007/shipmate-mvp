@@ -6,13 +6,14 @@
 
 ---
 
-## 📹 Demo Video Walkthrough (113.6s)
+## 📹 Demo Video Walkthrough (113.6s with Voice Guide)
 
-A full automated end-to-end recording of the live deployed application is available locally at `shipmate_demo.mp4` (Duration: 1m 53s / 113.6 seconds, 1280x720 H.264 at 30 fps).
+A full automated end-to-end recording of the live deployed application with an AI female voiceover guide is available locally at `shipmate_demo.mp4` (Duration: 1m 53s / 113.6 seconds, 1280x720 H.264 at 30 fps, AAC audio).
 
-To generate or replay the recording at any time:
+To re-record and re-generate the narrated video:
 ```bash
 node scripts/record-demo.js
+uv run --with edge-tts python3 scripts/add-voiceover.py
 ```
 
 ### Flow Recorded:
