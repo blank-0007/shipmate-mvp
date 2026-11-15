@@ -149,6 +149,7 @@ SUPABASE_SERVICE_ROLE_KEY=   # Supabase service role secret key
 ---
 
 ## 📋 Documentation
+- [Official Submission PDF](file:///Users/blank/Desktop/shipmate-mvp/ShipMate_MVP_Submission.pdf)
 - [Audit Report](file:///Users/blank/Desktop/shipmate-mvp/docs/AUDIT_REPORT.md)
 - [Claims & Verification Matrix](file:///Users/blank/Desktop/shipmate-mvp/docs/CLAIMS_MATRIX.md)
 - [Live Deployment Verification](file:///Users/blank/Desktop/shipmate-mvp/docs/DEPLOY_VERIFICATION.md)
